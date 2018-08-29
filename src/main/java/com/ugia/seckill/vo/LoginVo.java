@@ -1,7 +1,15 @@
 package com.ugia.seckill.vo;
 
+import javax.validation.constraints.NotNull;
+
+import com.ugia.seckill.validator.IsMobile;
+
 public class LoginVo {
+	@NotNull
+	@IsMobile
 	private String mobile;
+	
+	@NotNull
 	private String password;
 	public String getMobile() {
 		return mobile;
