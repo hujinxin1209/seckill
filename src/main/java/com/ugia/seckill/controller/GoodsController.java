@@ -36,7 +36,7 @@ public class GoodsController {
 	MiaoshaUserService miaoshaUserService;
 	
 	@RequestMapping("/to_list")
-	public String toLogin(HttpServletResponse response, Model model,
+	public String list(HttpServletResponse response, Model model,
 			@CookieValue(value=MiaoshaUserService.COOKIE_NAME_TOKEN, required=false)String cookieToken,
 			@RequestParam(value=MiaoshaUserService.COOKIE_NAME_TOKEN,required=false)String paramToken){
 		if(StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)) {
@@ -48,24 +48,17 @@ public class GoodsController {
 		return "goods_list";
 	}
 	
-	@RequestMapping("/do_login")
-	@ResponseBody
-	public Result<Boolean> doLogin(HttpServletResponse response, @Valid LoginVo loginVo){
-		log.info(loginVo.toString());
-		// 参数校验
-//		String passInput = loginVo.getPassword();
-//		String mobile = loginVo.getMobile();
-//		if(StringUtils.isEmpty(passInput)) {
-//			return Result.error(CodeMsg.PASSWORD_EMPTY);
+	@RequestMapping("/to_detail")
+	public String detail(HttpServletResponse response, Model model,
+//			@CookieValue(value=MiaoshaUserService.COOKIE_NAME_TOKEN, required=false)String cookieToken,
+//			@RequestParam(value=MiaoshaUserService.COOKIE_NAME_TOKEN,required=false)String paramToken
+			MiaoshaUser user){
+//		if(StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)) {
+//			return "login";
 //		}
-//		if(StringUtils.isEmpty(mobile)) {
-//			return Result.error(CodeMsg.MOBILE_EMPTY);
-//		}
-//		if(!ValidatorUtil.isMobile(mobile)) {
-//			return Result.error(CodeMsg.MOBILE_ERROR);
-//		}
-		// 登录
-		miaoshaUserService.login(response, loginVo);
-		return Result.success(true);
+//		String token = StringUtils.isEmpty(paramToken)?cookieToken : paramToken;
+//		MiaoshaUser user = miaoshaUserService.getByToken(response, token);
+		model.addAttribute("user", user);
+		return "goods_list";
 	}
 }
