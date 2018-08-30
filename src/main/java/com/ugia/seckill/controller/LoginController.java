@@ -50,11 +50,7 @@ public class LoginController {
 //			return Result.error(CodeMsg.MOBILE_ERROR);
 //		}
 		// 登录
-		CodeMsg cMsg = miaoshaUserService.login(loginVo);
-		if(cMsg.getCode() == 0) {
-			return Result.success(true);
-		} else {
-			return Result.error(cMsg);
-		}
+		miaoshaUserService.login(loginVo);
+		return Result.success(true);
 	}
 }

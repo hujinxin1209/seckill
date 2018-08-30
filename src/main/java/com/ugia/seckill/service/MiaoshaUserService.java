@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.ugia.seckill.dao.MiaoshaUserDao;
 import com.ugia.seckill.domain.MiaoshaUser;
+import com.ugia.seckill.exception.GlobalException;
 import com.ugia.seckill.result.CodeMsg;
 import com.ugia.seckill.util.MD5Util;
 import com.ugia.seckill.vo.LoginVo;
@@ -19,9 +20,9 @@ public class MiaoshaUserService {
 		return miaoshaUserDao.getById(id);
 	}
 
-	public CodeMsg login(LoginVo loginVo) {
+	public boolean login(LoginVo loginVo) {
 		if(loginVo == null) {
-			return CodeMsg.SERVER_ERROR;
+			throw new GlobalException(CodeMsg.SERVER_ERROR);
 		}
 		
 		String mobile = loginVo.getMobile();
@@ -29,7 +30,7 @@ public class MiaoshaUserService {
 		
 		MiaoshaUser user = getById(Long.parseLong(mobile));
 		if(user == null) {
-			return CodeMsg.MOBILE_NOT_EXIST;
+			throw new GlobalException(CodeMsg.MOBILE_NOT_EXIST);
 		}
 		
 		// 验证密码
@@ -37,8 +38,8 @@ public class MiaoshaUserService {
 		String saltDB = user.getSalt();
 		String calcPas = MD5Util.formPassToDBPass(formPassword, saltDB);
 		if(!calcPas.equals(dbPassword)) {
-			return CodeMsg.PASSWORD_WRONG;
+			throw new GlobalException( CodeMsg.PASSWORD_WRONG);
 		}
-		return CodeMsg.SUCESS;
+		return true;
 	}
 }
