@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ugia.seckill.dao.GoodsDao;
 import com.ugia.seckill.dao.UserDao;
+import com.ugia.seckill.domain.Goods;
+import com.ugia.seckill.domain.MiaoshaGoods;
 import com.ugia.seckill.domain.User;
 import com.ugia.seckill.vo.GoodsVo;
 
@@ -22,5 +24,11 @@ public class GoodsService {
 
 	public GoodsVo getGoodsVoByGoodsId(long goodsId) {
 		return goodsDao.getGoodsVoByGoodsId(goodsId);
+	}
+
+	public int reduceStock(GoodsVo goods) {
+		MiaoshaGoods g = new MiaoshaGoods();
+		g.setGoodsId(goods.getId());
+		return goodsDao.reduceStock(g);
 	}
 }
