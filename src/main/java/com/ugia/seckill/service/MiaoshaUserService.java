@@ -41,7 +41,7 @@ public class MiaoshaUserService {
 		return user;
 	}
 	
-	public boolean updatePassword(long id, String password) {
+	public boolean updatePassword(String token, long id, String password) {
 		MiaoshaUser user = getById(id);
 		if(user == null) {
 			throw new GlobalException(CodeMsg.MOBILE_NOT_EXIST);
@@ -49,6 +49,13 @@ public class MiaoshaUserService {
 		MiaoshaUser toBeUpdate = new MiaoshaUser();
 		toBeUpdate.setId(id);
 		toBeUpdate.setPassword(MD5Util.formPassToDBPass(password, user.getSalt()));
+		miaoshaUserDao.update(toBeUpdate);
+		
+		// 处理缓存
+		redisService.delete(MiaoshaUserKey.getById, ""+id);
+		user.setPassword(toBeUpdate.getPassword());
+		redisService.set(MiaoshaUserKey.token, token, user);
+		return true;
 	}
 
 	public boolean login(HttpServletResponse response, LoginVo loginVo) {

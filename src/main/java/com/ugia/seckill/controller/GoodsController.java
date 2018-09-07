@@ -55,14 +55,15 @@ public class GoodsController {
 	@ResponseBody
 	public String listGoodsVo(HttpServletResponse response, HttpServletRequest request, Model model, MiaoshaUser user) {
 		model.addAttribute("user", user);
-		// 查询商品
-		List<GoodsVo> goodsList = goodsService.listGoodsVo();
-		model.addAttribute("goodsList", goodsList);
 		// 取缓存
 		String html = redisService.get(GoodsKey.getGoodsList, "", String.class);
 		if (!StringUtils.isEmpty(html)) {
 			return html;
 		}
+		// 查询商品
+		List<GoodsVo> goodsList = goodsService.listGoodsVo();
+		model.addAttribute("goodsList", goodsList);
+
 		SpringWebContext ctx = new SpringWebContext(request, response, request.getServletContext(), request.getLocale(),
 				model.asMap(), applicationContext);
 		// 手动渲染
@@ -80,7 +81,7 @@ public class GoodsController {
 		model.addAttribute("user", user);
 
 		// 取缓存
-		String html = redisService.get(GoodsKey.getGoodsDetail, ""+goodsId, String.class);
+		String html = redisService.get(GoodsKey.getGoodsDetail, "" + goodsId, String.class);
 		if (!StringUtils.isEmpty(html)) {
 			return html;
 		}
@@ -108,14 +109,14 @@ public class GoodsController {
 		}
 		model.addAttribute("miaoshaStatus", miaoshaStatus);
 		model.addAttribute("remainSeconds", remainSeconds);
-		//return "goods_detail";
+		// return "goods_detail";
 
 		SpringWebContext ctx = new SpringWebContext(request, response, request.getServletContext(), request.getLocale(),
 				model.asMap(), applicationContext);
 		// 手动渲染
 		html = thymeleafViewResolver.getTemplateEngine().process("goods_detail", ctx);
 		if (!StringUtils.isEmpty(html)) {
-			redisService.set(GoodsKey.getGoodsDetail, ""+goodsId, html);
+			redisService.set(GoodsKey.getGoodsDetail, "" + goodsId, html);
 		}
 		return html;
 	}
