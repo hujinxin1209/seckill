@@ -30,6 +30,7 @@ import com.ugia.seckill.service.GoodsService;
 import com.ugia.seckill.service.MiaoshaUserService;
 import com.ugia.seckill.service.UserService;
 import com.ugia.seckill.util.ValidatorUtil;
+import com.ugia.seckill.vo.GoodsDetailVo;
 import com.ugia.seckill.vo.GoodsVo;
 import com.ugia.seckill.vo.LoginVo;
 
@@ -119,5 +120,38 @@ public class GoodsController {
 			redisService.set(GoodsKey.getGoodsDetail, "" + goodsId, html);
 		}
 		return html;
+	}
+	
+	// 页面静态化：利用浏览器缓存
+	@RequestMapping(value = "/to_detail2/{goodsId}")
+	@ResponseBody
+	public Result<GoodsDetailVo> detail2(HttpServletRequest request, HttpServletResponse response, MiaoshaUser user, Model model,
+			@PathVariable("goodsId") long goodsId) {
+		model.addAttribute("user", user);
+		GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
+		model.addAttribute("goods", goods);
+
+		long startAt = goods.getStartDate().getTime();
+		long endAt = goods.getEndDate().getTime();
+		long now = System.currentTimeMillis();
+		int miaoshaStatus = 0;
+		int remainSeconds = 0;
+
+		if (now < startAt) { // 秒杀未开始，倒计时
+			miaoshaStatus = 0;
+			remainSeconds = (int) (startAt - now) / 1000;
+		} else if (now > endAt) { // 秒杀已结束
+			miaoshaStatus = 2;
+			remainSeconds = -1;
+		} else { // 秒杀正在进行
+			miaoshaStatus = 1;
+			remainSeconds = 0;
+		}
+		GoodsDetailVo vo = new GoodsDetailVo();
+		vo.setGoods(goods);
+		vo.setUser(user);
+		vo.setMiaoshaStatus(miaoshaStatus);
+		vo.setRemainSeconds(remainSeconds);
+		return Result.success(vo);
 	}
 }
