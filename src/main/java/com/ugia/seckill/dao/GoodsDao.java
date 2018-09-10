@@ -22,6 +22,6 @@ public interface GoodsDao {
 			+ "miaosha_goods mg left join goods g on mg.goods_id = g.id where g.id=#{goodsId}")
 	public GoodsVo getGoodsVoByGoodsId(@PathVariable("goodsId")long goodsId);
 
-	@Update("update miaosha_goods set stock_count = stock_count-1 where goods_id=#{goodsId}")
+	@Update("update miaosha_goods set stock_count = stock_count-1 where goods_id=#{goodsId} and stock_count > 0")
 	public int reduceStock(MiaoshaGoods g);
 }

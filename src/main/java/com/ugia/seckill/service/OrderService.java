@@ -10,16 +10,21 @@ import com.ugia.seckill.dao.OrderDao;
 import com.ugia.seckill.domain.MiaoshaOrder;
 import com.ugia.seckill.domain.MiaoshaUser;
 import com.ugia.seckill.domain.OrderInfo;
+import com.ugia.seckill.redis.OrderKey;
+import com.ugia.seckill.redis.RedisService;
 import com.ugia.seckill.vo.GoodsVo;
 
 @Service
 public class OrderService {
 	@Autowired
 	OrderDao orderDao;
+	@Autowired
+	RedisService redisService;
 
 	public MiaoshaOrder getMiaoshaOrderByUserIdGoodsId(long userId, long goodsId) {
 
-		return orderDao.getMiaoshaOrderByUserIdGoodsId(userId, goodsId);
+		//return orderDao.getMiaoshaOrderByUserIdGoodsId(userId, goodsId);
+		return redisService.get(OrderKey.getMiaoshaOrderByUidGid, ""+userId+"_"+goodsId, MiaoshaOrder.class);
 	}
 
 	@Transactional
@@ -40,6 +45,7 @@ public class OrderService {
 		miaoshaOrder.setUserId(user.getId());
 		miaoshaOrder.setOrderId(orderId);
 		orderDao.insertMiaoshaOrder(miaoshaOrder);
+		redisService.set(OrderKey.getMiaoshaOrderByUidGid, ""+user.getId()+"_"+goods.getId(), MiaoshaOrder.class);
 		return orderInfo;
 	}
 
