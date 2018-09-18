@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.ugia.seckill.domain.User;
+import com.ugia.seckill.rabbitmq.MQSender;
 import com.ugia.seckill.redis.RedisService;
 import com.ugia.seckill.redis.UserKey;
 import com.ugia.seckill.result.CodeMsg;
@@ -27,12 +28,23 @@ public class DemoController {
 	@Autowired
 	private RedisService redisService;
 
+	@Autowired
+	MQSender sender;
+	
 	@RequestMapping("/")
 	@ResponseBody
 	public String home() {
 		return "ugia";
 	}
 
+	@RequestMapping("/mq")
+	@ResponseBody
+	public Result<String> mq() {
+		sender.send("hello, mq");
+		return Result.success("Hello mq");
+	}
+
+	
 	@RequestMapping("/wshello")
 	@ResponseBody
 	public Result<String> hello() {
