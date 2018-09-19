@@ -43,6 +43,27 @@ public class DemoController {
 		sender.send("hello, mq");
 		return Result.success("Hello mq");
 	}
+	
+	@RequestMapping("/mq/topic")
+	@ResponseBody
+	public Result<String> topic() {
+		sender.sendTopic("hello, mq");
+		return Result.success("Hello mq");
+	}
+	
+	@RequestMapping("/mq/fanout")
+	@ResponseBody
+	public Result<String> fanout() {
+		sender.sendFanout("hello, mq");
+		return Result.success("Hello mq");
+	}
+	
+	@RequestMapping("/mq/header")
+	@ResponseBody
+	public Result<String> header() {
+		sender.sendHeader("hello, mq");
+		return Result.success("Hello mq");
+	}
 
 	
 	@RequestMapping("/wshello")
