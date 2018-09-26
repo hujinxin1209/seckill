@@ -48,5 +48,11 @@ public class MQSender {
 		amqpTemplate.convertAndSend(MQConfig.HEADERS_EXCHANGE, "", obj);
 		
 	}
+
+	public void sendMiaoshaMessage(MiaoshaMessage mm) {
+		String msg = RedisService.beanToString(mm);
+		log.info("miaosha message : " + msg);
+		amqpTemplate.convertAndSend(MQConfig.MIAOSHA_QUEUE, msg);
+	}
 	
 }
