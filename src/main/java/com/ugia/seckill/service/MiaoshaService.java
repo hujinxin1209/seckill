@@ -1,5 +1,7 @@
 package com.ugia.seckill.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +61,11 @@ public class MiaoshaService {
 	
 	private boolean getGoodsOver(long goodsId) {
 		return redisService.exists(Miaoshakey.isGoodsOver, ""+goodsId);
+	}
+
+	public void reset(List<GoodsVo> goodsList) {
+		goodsService.resetStock(goodsList);
+		orderService.deleteOrders();
 	}
 
 }

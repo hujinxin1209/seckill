@@ -1,6 +1,8 @@
 package com.ugia.seckill.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.factory.InitializingBean;
@@ -18,6 +20,8 @@ import com.ugia.seckill.domain.OrderInfo;
 import com.ugia.seckill.rabbitmq.MQSender;
 import com.ugia.seckill.rabbitmq.MiaoshaMessage;
 import com.ugia.seckill.redis.GoodsKey;
+import com.ugia.seckill.redis.Miaoshakey;
+import com.ugia.seckill.redis.OrderKey;
 import com.ugia.seckill.redis.RedisService;
 import com.ugia.seckill.result.CodeMsg;
 import com.ugia.seckill.result.Result;
@@ -48,6 +52,8 @@ public class MiaoshaController implements InitializingBean {
 	
 	@Autowired
 	MQSender sender;
+	
+	private Map<Long, Boolean> localOverMap = new HashMap<Long, Boolean>();
 
 	// 系统初始化
 	@Override
@@ -58,6 +64,7 @@ public class MiaoshaController implements InitializingBean {
 		}
 		for (GoodsVo goods : goodsList) {
 			redisService.set(GoodsKey.getMiaoshaGoodsStock, "" + goods.getId(), goods.getStockCount());
+			localOverMap.put(goods.getId(), false);
 		}
 	}
 
@@ -73,12 +80,18 @@ public class MiaoshaController implements InitializingBean {
 		if (user == null) {
 			return Result.error(CodeMsg.SESSION_ERROR);
 		}
-
-		long stock = redisService.decr(GoodsKey.getMiaoshaGoodsStock, "" + goodsId);
-		if (stock < 0) {
+		
+		boolean over = localOverMap.get(goodsId);
+		if(over) {
 			return Result.error(CodeMsg.MIAO_SHA_OVER);
 		}
 
+		long stock = redisService.decr(GoodsKey.getMiaoshaGoodsStock, "" + goodsId);
+		if (stock < 0) {
+			localOverMap.put(goodsId, true);
+			return Result.error(CodeMsg.MIAO_SHA_OVER);
+		}
+		
 		// 判断是否已经秒杀到了
 		MiaoshaOrder order = orderService.getMiaoshaOrderByUserIdGoodsId(user.getId(), goodsId);
 		if (order != null) {
@@ -101,6 +114,21 @@ public class MiaoshaController implements InitializingBean {
 			return Result.error(CodeMsg.SESSION_ERROR);
 		long result = miaoshaService.getMiaoshaResult(user.getId(), goodsId);
 		return Result.success(result);
+	}
+	
+	@RequestMapping(value="/reset", method=RequestMethod.GET)
+	@ResponseBody
+	public Result<Boolean> reset(Model model){
+		List<GoodsVo> goodsList = goodsService.listGoodsVo();
+		for(GoodsVo goods : goodsList) {
+			goods.setStockCount(10);
+			redisService.set(GoodsKey.getMiaoshaGoodsStock, ""+goods.getId(), 10);
+			localOverMap.put(goods.getId(), false);
+		}
+		redisService.delete(OrderKey.getMiaoshaOrderByUidGid);
+		redisService.delete(Miaoshakey.isGoodsOver);
+		miaoshaService.reset(goodsList);
+		return Result.success(true);
 	}
 
 }
