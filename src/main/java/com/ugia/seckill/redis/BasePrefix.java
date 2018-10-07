@@ -1,8 +1,7 @@
 package com.ugia.seckill.redis;
 
 public abstract class BasePrefix implements KeyPrefix{
-	
-	private int expireSeconds;
+private int expireSeconds;
 	
 	private String prefix;
 	

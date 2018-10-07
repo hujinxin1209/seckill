@@ -11,8 +11,10 @@ import com.ugia.seckill.domain.Goods;
 import com.ugia.seckill.domain.MiaoshaOrder;
 import com.ugia.seckill.domain.MiaoshaUser;
 import com.ugia.seckill.domain.OrderInfo;
-import com.ugia.seckill.redis.Miaoshakey;
+import com.ugia.seckill.redis.MiaoshaKey;
 import com.ugia.seckill.redis.RedisService;
+import com.ugia.seckill.util.MD5Util;
+import com.ugia.seckill.util.UUIDUtil;
 import com.ugia.seckill.vo.GoodsVo;
 
 @Service
@@ -55,17 +57,34 @@ public class MiaoshaService {
 	}
 
 	private void setGoodsOver(Long id) {
-		redisService.set(Miaoshakey.isGoodsOver, ""+id, true);
+		redisService.set(MiaoshaKey.isGoodsOver, ""+id, true);
 	}
 
 	
 	private boolean getGoodsOver(long goodsId) {
-		return redisService.exists(Miaoshakey.isGoodsOver, ""+goodsId);
+		return redisService.exists(MiaoshaKey.isGoodsOver, ""+goodsId);
 	}
 
 	public void reset(List<GoodsVo> goodsList) {
 		goodsService.resetStock(goodsList);
 		orderService.deleteOrders();
+	}
+
+	public boolean checkPath(MiaoshaUser user, long goodsId, String path) {
+		if(user == null || path == null) {
+			return false;
+		}
+		String pathOld = redisService.get(MiaoshaKey.getMiaoshaPath, ""+user.getId() + "_"+ goodsId, String.class);
+		return path.equals(pathOld);
+	}
+
+	public String createMiaoshaPath(MiaoshaUser user, long goodsId) {
+		if(user == null || goodsId <=0) {
+			return null;
+		}
+		String str = MD5Util.md5(UUIDUtil.uuid()+"123456");
+    	redisService.set(MiaoshaKey.getMiaoshaPath, ""+user.getId() + "_"+ goodsId, str);
+		return str;
 	}
 
 }
