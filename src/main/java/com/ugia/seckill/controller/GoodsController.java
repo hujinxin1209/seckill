@@ -123,7 +123,7 @@ public class GoodsController {
 	}
 	
 	// 页面静态化：利用浏览器缓存
-	@RequestMapping(value = "/to_detail2/{goodsId}")
+	@RequestMapping(value = "/detail/{goodsId}")
 	@ResponseBody
 	public Result<GoodsDetailVo> detail2(HttpServletRequest request, HttpServletResponse response, MiaoshaUser user, Model model,
 			@PathVariable("goodsId") long goodsId) {

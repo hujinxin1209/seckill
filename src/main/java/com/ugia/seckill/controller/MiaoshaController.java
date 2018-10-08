@@ -1,8 +1,14 @@
 package com.ugia.seckill.controller;
 
+import java.awt.image.BufferedImage;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.factory.InitializingBean;
@@ -15,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.ugia.seckill.access.AccessLimit;
 import com.ugia.seckill.domain.MiaoshaOrder;
 import com.ugia.seckill.domain.MiaoshaUser;
 import com.ugia.seckill.domain.OrderInfo;
@@ -170,5 +177,25 @@ public class MiaoshaController implements InitializingBean {
 		miaoshaService.reset(goodsList);
 		return Result.success(true);
 	}
+	
+	@RequestMapping(value="/verifyCode", method=RequestMethod.GET)
+    @ResponseBody
+    public Result<String> getMiaoshaVerifyCod(HttpServletResponse response,MiaoshaUser user,
+    		@RequestParam("goodsId")long goodsId) {
+    	if(user == null) {
+    		return Result.error(CodeMsg.SESSION_ERROR);
+    	}
+    	try {
+    		BufferedImage image  = miaoshaService.createVerifyCode(user, goodsId);
+    		OutputStream out = response.getOutputStream();
+    		ImageIO.write(image, "JPEG", out);
+    		out.flush();
+    		out.close();
+    		return null;
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		return Result.error(CodeMsg.MIAOSHA_FAIL);
+    	}
+    }
 
 }
