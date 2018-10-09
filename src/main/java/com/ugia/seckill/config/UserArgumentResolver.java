@@ -14,6 +14,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.alibaba.druid.util.StringUtils;
+import com.ugia.seckill.access.UserContext;
 import com.ugia.seckill.domain.MiaoshaUser;
 import com.ugia.seckill.service.MiaoshaUserService;
 
@@ -22,40 +23,15 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver{
 	
 	@Autowired
 	MiaoshaUserService userService;
-
-	@Override
-	public Object resolveArgument(MethodParameter arg0, ModelAndViewContainer arg1, NativeWebRequest arg2,
-			WebDataBinderFactory arg3) throws Exception {
-		HttpServletResponse response = arg2.getNativeResponse(HttpServletResponse.class);
-		HttpServletRequest request = arg2.getNativeRequest(HttpServletRequest.class);
-		
-		String paramToken = request.getParameter(MiaoshaUserService.COOKIE_NAME_TOKEN);
-		String cookieToken = getCookieValue(request, MiaoshaUserService.COOKIE_NAME_TOKEN);
-		if(StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)) {
-			return null;
-		}
-		String token = StringUtils.isEmpty(paramToken)?cookieToken:paramToken;
-		return userService.getByToken(response, token);
-	}
-
-	private String getCookieValue(HttpServletRequest request, String cookieNameToken) {
-		Cookie[] cookies = request.getCookies();
-		if(cookies == null || cookies.length <= 0) {
-			return null;
-		}
-		for(Cookie cookie : cookies) {
-			if(cookie.getName().equals(cookieNameToken)) {
-				return cookie.getValue();
-			}
-		}
-		return null;
-	}
-
-	@Override
+	
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> clazzClass = parameter.getParameterType();
-		
-		return clazzClass == MiaoshaUser.class;
+		Class<?> clazz = parameter.getParameterType();
+		return clazz==MiaoshaUser.class;
+	}
+
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+		return UserContext.getUser();
 	}
 
 }
